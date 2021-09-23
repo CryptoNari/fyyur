@@ -13,6 +13,8 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+import sys
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -247,33 +249,37 @@ def show_venue(venue_id):
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
   form = VenueForm()
-  print(form)
   return render_template('forms/new_venue.html', form=form)
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # TODO: insert form data as a new Venue record in the db, instead
+  # TODO: insert form data as a new Venue record in the db, instead --done
+  #  Implement form submissions for creating new Venues, Artists, and Shows.
+  #  There should be proper constraints, powering the /create endpoints that
+  #  serve the create form templates, to avoid duplicate or nonsensical form
+  #  submissions. Submitting a form should create proper new records in the database.
   # TODO: modify data to be the data object returned from db insertion
-  error = False
   try:
-    venue = Venue()
-    venue.name = request.form['name']
-    venue.city = request.form['city']
-    venue.state = request.form['state']
-    venue.address = request.form['address']
-    venue.phone = request.form['phone']
-    venue.genres = request.form.getlist('genres')
-    venue.image_link = request.form['image_link']
-    venue.facebook_link = request.form['facebook_link']
-    venue.website_link = request.form['website_link']
-    if request.form.get('seeking_talent') == 'y' :
-      venue.seeking_talent = True
-    venue.seeking_description = request.form['seeking_description']
+    form = VenueForm()
+    print(form.validate_on_submit())
     
+    venue = Venue()
+    form.populate_obj(venue)
+    # venue.name = request.form['name']
+    # venue.city = request.form['city']
+    # venue.state = request.form['state']
+    # venue.address = request.form['address']
+    # venue.phone = request.form['phone']
+    # venue.genres = request.form.getlist('genres')
+    # venue.image_link = request.form['image_link']
+    # venue.facebook_link = request.form['facebook_link']
+    # venue.website_link = request.form['website_link']
+    # if request.form.get('seeking_talent') == 'y' :
+    #   venue.seeking_talent = True
+    # venue.seeking_description = request.form['seeking_description']
     db.session.add(venue)
     db.session.commit()
   except:
-    error = True
     db.session.rollback()
   finally:
     db.session.close()    
@@ -282,11 +288,6 @@ def create_venue_submission():
   else:
     flash('Venue ' + request.form['name'] + ' was successfully listed!')    
   return render_template('pages/home.html')    
-  # on successful db insert, flash success
-  
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/ 
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
@@ -537,9 +538,18 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
-
+  
+  try:
+    form = ShowForm()
+    show = Show()
+    form.populate_obj(show)
+    db.session.add(show)
+    db.session.commit()
   # on successful db insert, flash success
-  flash('Show was successfully listed!')
+    flash('Show was successfully listed!')
+  except:
+    db.session.rollback()
+    print(sys.exc_info()) 
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Show could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
