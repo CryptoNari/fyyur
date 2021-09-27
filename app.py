@@ -167,17 +167,16 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive. --done
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-  response={
-    "count": 1,
-    "data": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }
+  response = {}
+  ilike_search = f"%{request.form['search_term']}%"
+  print(ilike_search)
+  venue_search = Venue.query.filter(Venue.name.ilike(ilike_search))
+  print(venue_search)
+  response['count']= venue_search.count()
+  response['data']= venue_search.all()
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
@@ -340,6 +339,7 @@ def create_venue_submission():
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+  print('id:' + venue_id)
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
@@ -354,17 +354,14 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive. --done
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
-  response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
-  }
+  response = {}
+  ilike_search = f"%{request.form['search_term']}%"
+  artist_search = Artist.query.filter(Artist.name.ilike(ilike_search))
+  response['count']= artist_search.count()
+  response['data']= artist_search.all()
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
